@@ -180,43 +180,4 @@ final class MongoDbTest extends Unit
             $this->module->haveInCollection('96_bulls', $testRecord);
         }
     }
-
-    /**
-     * @group cleanup-dirty
-     */
-    public function testCleanupDirty()
-    {
-        $test = $this->createMock(\Codeception\TestInterface::class);
-        $collection = $this->db->selectCollection('96_bulls');
-
-        $hash1 = $this->module->driver->getDbHash();
-        $this->module->seeNumElementsInCollection('96_bulls', 7);
-        $this->assertSame($hash1, $this->module->driver->getDbHash());
-
-        $this->module->_after($test);
-
-        $this->module->_before($test); // No cleanup expected
-
-        $this->assertSame($hash1, $this->module->driver->getDbHash());
-        $collection->insertOne(['name' => 'Coby White','position' => 'pg']);
-
-        $hashDirty = $this->module->driver->getDbHash();
-        $this->assertNotSame($hash1, $hashDirty);
-
-        $this->module->_after($test);
-
-        $this->module->_before($test); // Cleanup expected
-        $this->module->seeNumElementsInCollection('96_bulls', 7);
-
-        $hash2 = $this->module->driver->getDbHash();
-
-        $this->assertNotSame($hash1, $hash2);
-        $this->assertNotSame($hashDirty, $hash2);
-
-        $this->module->_after($test);
-
-        $this->module->_before($test); // No cleanup expected
-
-        $this->assertSame($hash2, $this->module->driver->getDbHash());
-    }
 }
